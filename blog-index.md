@@ -1,10 +1,9 @@
 ---
 layout: default
-title: Blog
+title: Blog Posts
 permalink: /blog-index/
 ---
 
-# Blog posts
 {% for post in site.categories.blog %}
 * {{ post.date | date: "%Y-%m-%d" }} - [{{ post.title }}]({{ post.url | prepend: site.baseurl }})
 {% endfor %}
