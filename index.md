@@ -1,6 +1,13 @@
 ---
-# You don't need to edit this file, it's empty on purpose.
-# Edit theme's home layout instead if you wanna make some changes
-# See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 layout: default
 ---
+
+## Recent blog posts
+{% for post in site.categories.blog offset: 0 limit: 5 %}
+* {{ post.date | date: "%Y-%m-%d" }} - [{{ post.title }}]({{ post.url | prepend: site.baseurl }})
+{% endfor %}
+[More...](blog-index)
+
+## Other stuff
+* [About](about)
+* [Resume](resume)

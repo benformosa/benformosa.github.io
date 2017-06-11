@@ -22,7 +22,8 @@ github_username:  benformosa
 
 # Build settings
 markdown: kramdown
-theme: jekyll-theme-slate
+highlighter: rouge
+theme: jekyll-theme-tactile
 gems:
   - jekyll-feed
 exclude:
