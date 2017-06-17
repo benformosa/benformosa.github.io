@@ -10,9 +10,11 @@ tags:
   - wallpaper
 ---
 
+![Collage of Windows Spotlight images]({{ site.url }}/assets/copy-spotlightimages-collage.jpg)
+
 I like Windows 10. Something I like about it is that the nice people at Microsoft sometimes change the picture on your lock screen, with a feature called [Windows Spotlight](https://docs.microsoft.com/en-us/windows/configuration/windows-spotlight). These pictures are supposed to be customised to your preferences based on which you give a ❤ t️o️. For me, it's usually a scenic landscape of some far-away place much more beautiful than the town I live in.
 
-### Problem statement
+## Problem statement
 I'd like to use the Windows Spotlight pictures as my desktop wallpaper.
 
 I like having an attractive wallpaper, and I like to have it change occasionally. Often this means searching for a website that aggregates wallpapers, avoiding the ones that seem dodgy and manually downloading some that I like the look of. This isn't great fun, and I still don't get wallpapers I love. Then you have to copy them over to all your computers, or do it all again when you reinstall Windows.
@@ -20,12 +22,12 @@ I like having an attractive wallpaper, and I like to have it change occasionally
 There's quite a few articles on the web about how to find where Windows Spotlight stashes the image files that it downloads, such as this one from [Windows Central](https://www.windowscentral.com/how-save-all-windows-spotlight-lockscreen-images), but this isn't a complete solution to the problem. I don't want to remember to go do this each week, copy and rename all those files and sift out the thumbnails and app logos.
 So I wrote a script to do it for me.
 
-### Requirements
+## Requirements
 * Run silently and non-interactively
 * Filter out only the images that will make nice wallpapers, i.e. full size, landscape images
 * No dependencies - only use what Windows 10 provides out of the box
 
-### Solution
+## Solution
 What I ended up with is [Copy-SpotlightImages.ps1](https://github.com/benformosa/Toolbox/blob/master/Windows/Copy-SpotlightImages.ps1). This is a PowerShell script which uses native PowerShell as well as .Net's [System.Drawing.Image](https://msdn.microsoft.com/en-us/library/system.drawing.image(v=vs.110).aspx) class.
 The script checks each file in the Spotlight images directory and copies it to a destination directory, if it meets the following criteria:
 * It is an image file. Simply attempting to create a System.Drawing.Image object will confirm this.
@@ -41,7 +43,7 @@ Running the script is simple. Here I'm using the defaults for Source and Destina
 Copy-SpotlightImages.ps1 -NoPortrait -NoSubFolders
 ```
 
-### Outcome
+## Outcome
 I have Copy-SpotlightImages.ps1 configured with [Task Scheduler](https://blogs.technet.microsoft.com/heyscriptingguy/2012/08/11/weekend-scripter-use-the-windows-task-scheduler-to-run-a-windows-powershell-script/) to run daily, and every day when I log in, I can see a relaxing view from my lock screen and my desktop.
 
 An unexpected additional functionality of this script is that it can be used to find interesting images in any directory. You could run it against your Pictures library, or even your web browser's cache.
@@ -50,4 +52,22 @@ Copy-SpotlightImages.ps1 `
   -Source "$env:HOMEPATH\AppData\Local\Mozilla\Firefox\Profiles\*.default\OfflineCache\" `
   -Destination "$env:HOMEPATH\Pictures\Firefox-Cache" `
   -NoPortrait -NoSubFolders -Verbose
+```
+
+## Example Image
+I used [ImageMagick](https://www.imagemagick.org/) to create the image at the top of this post. This code should create a collage of images the size of one of the original images.
+
+```bash
+# Randomly order input files
+FILES=$(find Pictures/Spotlight/Landscape/ -type f | sort -R)
+# How many images do we have?
+NUM=$(find Pictures/Spotlight/Landscape -type f | wc -l)
+# Get the width of an image. We happen to know that they are all the same.
+WIDTH=$(identify -format "%w" $(find Pictures/Spotlight/Landscape -type f | head -n 1))
+# How many images wide and high
+TILE=$(echo "sqrt($NUM)" | bc)
+# What size should the images in the collage be
+SIZE=$(echo "${WIDTH}/${TILE}" | bc)
+# Create the collage
+montage -resize $SIZE -mode Concatenate -tile "${TILE}x${TILE}" $FILES copy-spotlightimages-collage.jpg
 ```
