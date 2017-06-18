@@ -10,7 +10,8 @@ tags:
   - wallpaper
 ---
 
-![Collage of Windows Spotlight images]({{ site.url }}/assets/copy-spotlightimages-collage.jpg)
+![Collage of Windows Spotlight images](/assets/copy-spotlightimages-banner.png)
+{: style="text-align: center;"}
 
 I like Windows 10. Something I like about it is that the nice people at Microsoft sometimes change the picture on your lock screen, with a feature called [Windows Spotlight](https://docs.microsoft.com/en-us/windows/configuration/windows-spotlight). These pictures are supposed to be customised to your preferences based on which you give a ❤ t️o️. For me, it's usually a scenic landscape of some far-away place much more beautiful than the town I live in.
 
@@ -54,20 +55,37 @@ Copy-SpotlightImages.ps1 `
   -NoPortrait -NoSubFolders -Verbose
 ```
 
-## Example Image
-I used [ImageMagick](https://www.imagemagick.org/) to create the image at the top of this post. This code should create a collage of images the size of one of the original images.
+## Banner Image
+I used [ImageMagick](https://www.imagemagick.org/) to create the image at the top of this post. This code creates a collage of images the size of one of the original images ([full size here](/assets/copy-spotlightimages-collage.jpg)), and a cropped version with a transparent gradient.
 
 ```bash
 # Randomly order input files
 FILES=$(find Pictures/Spotlight/Landscape/ -type f | sort -R)
 # How many images do we have?
 NUM=$(find Pictures/Spotlight/Landscape -type f | wc -l)
-# Get the width of an image. We happen to know that they are all the same.
-WIDTH=$(identify -format "%w" $(find Pictures/Spotlight/Landscape -type f | head -n 1))
+# Get the width and height of an image. 
+# We happen to know that they are all the same.
+WIDTH=$(identify -format "%w" \
+  $(find Pictures/Spotlight/Landscape -type f | head -n 1))
+HEIGHT=$(identify -format "%h" \
+  $(find Pictures/Spotlight/Landscape -type f | head -n 1))
 # How many images wide and high
 TILE=$(echo "sqrt($NUM)" | bc)
 # What size should the images in the collage be
-SIZE=$(echo "${WIDTH}/${TILE}" | bc)
+TILEW=$(echo "${WIDTH}/${TILE}" | bc)
 # Create the collage
-montage -resize $SIZE -mode Concatenate -tile "${TILE}x${TILE}" $FILES copy-spotlightimages-collage.jpg
+montage -resize $TILEW -mode Concatenate \
+  -tile "${TILE}x${TILE}" $FILES copy-spotlightimages-collage.jpg
+
+# The banner should be a quarter of the original's height
+BANNERH=$(echo "${HEIGHT}/4" | bc)
+# We'll offset the banner by half of one image's height
+TILEH_HALF=$(echo "${HEIGHT}/${TILE}/2" | bc)
+# Create the banner. The content div in my blog theme is 620px wide
+convert \( copy-spotlightimages-collage.jpg \
+  -crop "${WIDTH}x${BANNERH}+0+${TILEH_HALF}"  +repage \) \
+  \( +clone -sparse-color Barycentric '0,0 white 0,%[fx:h-1] black' \
+  -level 0x30% -write /tmp/gradient.png \) \
+  -alpha off -compose copy_opacity -composite \
+  -resize 620 copy-spotlightimages-banner.png
 ```
