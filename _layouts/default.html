@@ -23,6 +23,9 @@
         <hr>
         <section id="main_content">
           {% if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+          {% if page.categories %}<em>Category: {{ page.categories }}</em><br />{% endif %}
+          {% if page.tags %}<em>Tags: {{ page.tags | join: ", " }}</em><br />{% endif %}
+          <br />
           {{ content }}
         </section>
 
