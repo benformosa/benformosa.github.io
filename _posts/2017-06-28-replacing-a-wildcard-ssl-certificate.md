@@ -40,13 +40,13 @@ ZONE=example.com
 ZONEFILE=external_example_dns.txt
 HOSTFILE=external_example_hostnames.txt
 REGEX="^[[:alnum:]]+\.$(echo $ZONE | sed 's/\./\\./g')"
-named-compilezone -o - $ZONE $ZONEFILE | \  # compile to a canonical zonefile format
-    grep -E $REGEX | \                      # grep for matching hostnames
-    grep -E 'IN (A|CNAME)' | \              # grep for A or CNAME records
-    tr -s '[:blank:]' ' ' | \
-    cut -d' ' -f1 | \                       # grab the hostnames only
-    sed 's/\.$//g' | \                      # strip the trailing dot
-    tr '[:upper:]' '[:lower:]' | \          # lowercase everything
+named-compilezone -o - $ZONE $ZONEFILE |  # compile to a canonical zonefile format
+    grep -E $REGEX |                      # grep for matching hostnames
+    grep -E 'IN (A|CNAME)' |              # grep for A or CNAME records
+    tr -s '[:blank:]' ' ' |
+    cut -d' ' -f1 |                       # grab the hostnames only
+    sed 's/\.$//g' |                      # strip the trailing dot
+    tr '[:upper:]' '[:lower:]' |          # lowercase everything
     sort -u > $HOSTFILE                     # sort, remove duplicates, output to file
 ```
 5. Attempt to connect to each host on port 443 and get the certificate.
