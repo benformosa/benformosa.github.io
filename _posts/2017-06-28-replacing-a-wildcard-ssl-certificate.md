@@ -34,12 +34,13 @@ Use Windows DNS tools to get a zone file from AD, `internal_example_dns.txt`:
 ```cmd
 dnscmd /ZoneExport example.com internal_example_dns.txt
 ```
-2. From the zone file, create a list of hostnames which would be valid for the wildcard certificate. This means exactly one label in front of the base name, e.g. **www**.example.com.  
+2. From the zone file, create a list of hostnames which would be valid for the wildcard certificate. This means exactly one label in front of the base name, e.g. **www**.example.com.  Optionally, set `SUBDOMAIN` to filter out a single subdomain from the zone.
 ```bash
 ZONE=example.com
+SUBDOMAIN=example.com
 ZONEFILE=external_example_dns.txt
 HOSTFILE=external_example_hostnames.txt
-REGEX="^[[:alnum:]]+\.$(echo $ZONE | sed 's/\./\\./g')"
+REGEX="^[[:alnum:]]+\.$(echo $SUBDOMAIN | sed 's/\./\\./g')"
 named-compilezone -o - $ZONE $ZONEFILE |  # compile to a canonical zonefile format
     grep -E $REGEX |                      # grep for matching hostnames
     grep -E 'IN (A|CNAME)' |              # grep for A or CNAME records
